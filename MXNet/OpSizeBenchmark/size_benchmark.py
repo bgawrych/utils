@@ -89,11 +89,12 @@ def reshape_data():
             yield (x, dst_shape)
 
 def split_data():
-    for i in range(3, 50):
-        data = mx.np.random.uniform(-1, 1, (1, i*3, 36))
-        num_outputs = 3
-        for ax in [-1, -2]:
-            yield (data, num_outputs, ax)
+    for i in range(1, 20):
+        for j in range(1, 100):
+            data = mx.np.random.uniform(-1, 1, (1, j*3, i*36))
+            num_outputs = 3
+            for ax in [-1, -2]:
+                yield (data, num_outputs, ax)
 
 def stack_data():
     for i in range(1, 50):
@@ -104,9 +105,9 @@ def stack_data():
 
 def slice_data():
     data = mx.np.random.uniform(-1, 1, (300, 300, 300))
-    for a0 in range(1, 100, 10):
-        for a1 in range(1, 100, 10):
-            for a2 in range(1, 100, 10):
+    for a0 in range(1, 199, 10):
+        for a1 in range(1, 199, 10):
+            for a2 in range(1, 199, 10):
                 for step in range(1, 100, 10):
                     r0 = [a0, a0 + step]
                     r1 = [a1, a1 + step]
@@ -119,23 +120,27 @@ def slice_data():
 
 def softmax_data():
     for i in range(1, 32):
-        data = mx.np.random.uniform(-1, 1, (12, i, 64))
-        for ax in range(3):
-            yield (data, None, ax, 0.7)
+        for j in range(1, 10):
+            data = mx.np.random.uniform(-1, 1, (12, i, 64*j))
+            for ax in range(3):
+                yield (data, None, ax, 0.7)
 
 def masked_softmax_data():
     for i in range(1, 32):
-        data = mx.np.random.uniform(-1, 1, (12, i, 64))
-        mask = mx.np.tril(mx.np.ones((12, i, 64))).astype(bool)
-        for ax in range(3):
-            yield (data, mask, ax, 0.7)
+        for j in range(1, 10):
+            data = mx.np.random.uniform(-1, 1, (12, i, 64*j))
+            mask = mx.np.tril(mx.np.ones((12, i, 64*j))).astype(bool)
+            for ax in range(3):
+                yield (data, mask, ax, 0.7)
 
 def fc_data():
     for i in range(1, 128, 3):
         for j in range(1, 10):
             data1 = mx.np.random.uniform(-1, 1, (i, j*64))
             data2 = mx.np.random.uniform(-1, 1, (i, j*64))
+            data3 = mx.np.random.uniform(-1, 1, (j*64, j*64))
             yield (data1, data2, None, i)
+            yield (data1, data3, None, j*64)
 
 def batch_dot_data():
     for i in range(1, 128, 3):
@@ -146,38 +151,42 @@ def batch_dot_data():
 
 def swapaxes_data():
     for i in range(1, 32):
-        data = mx.np.random.uniform(-1, 1, (1, 12, i, 64))
-        for a in range(4):
-            for b in range(a + 1, 4):
-                yield (data, a, b)
+        for j in range(1, 12):
+            data = mx.np.random.uniform(-1, 1, (1, j, i, 64))
+            for a in range(4):
+                for b in range(a + 1, 4):
+                    yield (data, a, b)
 
 def where_data():
     for i in range(1, 32):
-        condition = mx.np.tril(mx.np.ones((12, i, 64))).astype(bool)
-        iftrue = mx.np.random.uniform(-1, 1, (1, 12, i, 64))
-        iffalse = mx.np.random.uniform(-1, 1, (1, 12, i, 64))
-        yield (condition, iftrue, iffalse)
+        for j in range(1, 12):
+            condition = mx.np.tril(mx.np.ones((j, i, 64))).astype(bool)
+            iftrue = mx.np.random.uniform(-1, 1, (1, j, i, 64))
+            iffalse = mx.np.random.uniform(-1, 1, (1, j, i, 64))
+            yield (condition, iftrue, iffalse)
 
 def layernorm_data():
     for i in range(1, 32):
-        shape = [12, i, 64]
-        data = mx.np.ones(shape)
-        for ax in range(3):
-            gamma = mx.np.ones((shape[ax],))
-            beta = mx.np.ones((shape[ax],))
-            yield (data, gamma, beta, ax)
+        for j in range(1, 12):
+            shape = [j, i, 64]
+            data = mx.np.ones(shape)
+            for ax in range(3):
+                gamma = mx.np.ones((shape[ax],))
+                beta = mx.np.ones((shape[ax],))
+                yield (data, gamma, beta, ax)
 
 
 def binary_data():
-    for i in range(1, 32):
-        for bcast in [None, 0, 1, 2]:
-            s0 = [12, i, 64]
-            s1 = s0
-            if bcast is not None:
-                s1[bcast] = 1
-            data0 = mx.np.ones(tuple(s0))
-            data1 = mx.np.ones(tuple(s1))
-            yield (data0, data1)
+    for i in range(2, 512, 8):
+        for j in range(1, 12):
+            for bcast in [None, 0, 2]:
+                s0 = [j, i, 64]
+                s1 = s0
+                if bcast is not None:
+                    s1[bcast] = 1
+                data0 = mx.np.ones(tuple(s0))
+                data1 = mx.np.ones(tuple(s1))
+                yield (data0, data1)
 
 
 
