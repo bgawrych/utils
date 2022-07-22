@@ -178,10 +178,10 @@ def layernorm_data():
 
 def binary_data():
     for i in range(2, 512, 8):
-        for j in range(1, 12):
-            for bcast in [None, 0, 2]:
+        for j in range(2, 12):
+            for bcast in [None, 0, 1, 2]:
                 s0 = [j, i, 64]
-                s1 = s0
+                s1 = s0[:]
                 if bcast is not None:
                     s1[bcast] = 1
                 data0 = mx.np.ones(tuple(s0))
